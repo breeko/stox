@@ -79,6 +79,19 @@ export const unique = <T>(arr: T[]): T[] => {
   });
 }
 
+export const absoluteMean = (vals: number[]) => {
+  if (vals.length < 1) return 0
+  return vals.reduce((acc, val) => acc + Math.abs(val)) / vals.length
+}
+
+export const createFake = (dates: Date[], start: number, meanAbsDev: number) => {
+  // TODO: implement
+  // var prior = start
+  // return dates.map(d => {
+  //   const x = Math.random() * Math.
+  // })
+}
+
 export const getQuarter = (date: Date, quarterMapping: Map<Date, string>): string | undefined => {
   const quarterStartDate = Array.from(quarterMapping.keys()).find(d => d >= date)
   return quarterStartDate && quarterMapping.get(quarterStartDate)
