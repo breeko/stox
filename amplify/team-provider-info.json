@@ -1,0 +1,14 @@
+{
+    "prod": {
+        "awscloudformation": {
+            "AuthRoleName": "stox-prod-20191024070147-authRole",
+            "UnauthRoleArn": "arn:aws:iam::404289073511:role/stox-prod-20191024070147-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::404289073511:role/stox-prod-20191024070147-authRole",
+            "Region": "us-east-1",
+            "DeploymentBucketName": "stox-prod-20191024070147-deployment",
+            "UnauthRoleName": "stox-prod-20191024070147-unauthRole",
+            "StackName": "stox-prod-20191024070147",
+            "StackId": "arn:aws:cloudformation:us-east-1:404289073511:stack/stox-prod-20191024070147/ac6bee60-f64d-11e9-8cdc-12f81177eb92"
+        }
+    }
+}
