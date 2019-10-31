@@ -1,15 +1,16 @@
-import { timeParse } from "d3-time-format";
-import rp from 'request-promise'
-import { URLS } from "./Urls";
-import { StockHistoricalResponse, StockProfileResponse, StockMetricsResponse, StockHistory, StockProfile, StockMetric } from "./Response";
+import { timeParse } from "d3-time-format"
+import _ from "lodash"
+import { StockHistory } from "./Response"
 
-export const fromEntries = (arr: [string, any][]): object => Object.assign({}, ...Array.from(arr, ([k, v]) => ({[k]: v}) ));
+export const fromEntries = (arr: Array<[string, any]>): object =>
+  Object.assign({}, ...Array.from(arr, ([k, v]) => ({[k]: v}) ))
 
-export const convertNumeric = (obj: { [s: string]: any }) => fromEntries(Object.entries(obj).map(([k, v]) => { return [k, isNaN(Number(v)) ? v : Number(v)]}))
+export const convertNumeric = (obj: { [s: string]: any }) =>
+  fromEntries(Object.entries(obj).map(([k, v]) => ([k, isNaN(Number(v)) ? v : Number(v)])))
 
 export const choose = <T>(choices: T[]): T => {
-  var index = Math.floor(Math.random() * choices.length);
-  return choices[index];
+  const index = Math.floor(Math.random() * choices.length)
+  return choices[index]
 }
 
 export const randomInt = (from: number, to: number): number => Math.floor(Math.random() * (to - from) + from)
@@ -18,102 +19,77 @@ export const addDays = (date: Date, numberOfDays: number): Date => {
   const newDate = new Date(date.getTime())
   newDate.setDate(date.getDate() + numberOfDays)
   return newDate
-};
-
-const parseHistory = (d: any): StockHistoricalResponse => {
-  const parsed = JSON.parse(d)
-  const historical = parsed.historical.map((h: {date: string}) => {return {...h, date: parseDate(h.date)}})
-  return {...parsed, historical}
 }
 
-const parseMetrics = (d: any): StockMetricsResponse => {
-  const parsed = JSON.parse(d)
-  // TODO: what if no metrics??
-  const metrics = parsed.metrics.map((m: any) => convertNumeric(m)).map((m: {date: string}) => {return {...m, date: new Date(Date.parse(m.date))}})
-  const out = {...parsed, metrics} as StockMetricsResponse
-  return out
-}
-
-const parseProfile = (d: any): StockProfileResponse => {
-  const parsed = JSON.parse(d)
-  const range = parsed && parsed.profile && parsed.profile.range ? parsed.profile.range.split('-').map(parseFloat) : [0,0]
-  if (parsed.profile) parsed.profile.range = range
-  return parsed as StockProfileResponse
-}
-
-export const partition = <T>(arr: Array<T>, cmp: (item: T) => Boolean): [Array<T>, Array<T>] => {
-  const initialState: [T[], T[]] = [[], []];
+export const partition = <T>(arr: T[], cmp: (item: T) => boolean): [T[], T[]] => {
+  const initialState: [T[], T[]] = [[], []]
   return arr
     .reduce((result, element) => {
-      result[cmp(element) ? 0 : 1].push(element);
-      return result;
-    },      initialState);
-}
-
-export const getHistory = async (stock: string, from: Date, to: Date): Promise<StockHistory[]> => {
-  const url = URLS.history(stock, from, to)
-  const history = rp(url)
-    .then(data => parseHistory(data).historical)
-  return history
-}
-
-export const getProfile = async (stock: string, from: Date, to: Date): Promise<StockProfile> => {
-  const url = URLS.profile(stock)
-  const profile = rp(url)
-    .then(data => parseProfile(data).profile)
-  return profile
-}
-
-export const getMetrics = async (stock: string): Promise<StockMetric[]> => {
-  const url = URLS.metrics(stock)
-  const metrics = rp(url)
-    .then(data => parseMetrics(data).metrics)
-    .then(m => m.reverse())
-  return metrics
+      result[cmp(element) ? 0 : 1].push(element)
+      return result
+    },      initialState)
 }
 
 export const unique = <T>(arr: T[]): T[] => {
-  let seen = new Set();
+  const seen = new Set()
   return arr.filter(item => {
-      return seen.has(item) ? false : seen.add(item);
-  });
+      return seen.has(item) ? false : seen.add(item)
+  })
 }
 
-export const absoluteMean = (vals: number[]) => {
-  if (vals.length < 1) return 0
-  return vals.reduce((acc, val) => acc + Math.abs(val)) / vals.length
+export const diff = (arr: number[]): number[] => {
+  if (arr.length < 2) { return [0] }
+
+  const diffs: number[] = []
+  let prior = arr[0]
+  arr.slice(1).forEach(cur => {
+      const d = prior - cur
+      prior = cur
+      diffs.push(d)
+  })
+  return diffs
 }
 
-export const createFake = (dates: Date[], start: number, meanAbsDev: number) => {
-  // TODO: implement
-  // var prior = start
-  // return dates.map(d => {
-  //   const x = Math.random() * Math.
-  // })
+export const createOpposite = (original: StockHistory[]): StockHistory[] => {
+  const fake = _.cloneDeep(original)
+  const deltas = diff(original.map(p => p.close))
+  let cur = original ? original[0].close : 0
+  deltas.forEach( (d, idx) => {
+    cur += d
+    fake[idx + 1].close = cur
+  })
+  return fake
 }
 
-export const getQuarter = (date: Date, quarterMapping: Map<Date, string>): string | undefined => {
+export const getQuarter = (date: Date, quarterMapping: Map<Date, string>): string => {
   const quarterStartDate = Array.from(quarterMapping.keys()).find(d => d >= date)
-  return quarterStartDate && quarterMapping.get(quarterStartDate)
+  return quarterStartDate ? quarterMapping.get(quarterStartDate) || "NA" : "NA"
 }
 
 export const convertQuarterMapping = (dates: Date[]): Map<Date, string> => {
-  const x: [Date, string][] = dates.map(d =>
-    {
+  const x: Array<[Date, string]> = dates.map(d => {
       const month = d.getMonth() + 1
       const monthQuarter =
-       (month <= 3) ? 'Q1' :
-       (month <= 6) ? 'Q2' :
-       (month <= 9) ? 'Q3' :
-       (month <= 12) ? 'Q4' :
-       'NA'
+       (month <= 3) ? "Q1" :
+       (month <= 6) ? "Q2" :
+       (month <= 9) ? "Q3" :
+       (month <= 12) ? "Q4" :
+       "NA"
       const quarter = `${monthQuarter}-${d.getFullYear()}`
       return [d, quarter]
     })
   return new Map(x)
 }
 
-const parseDate = timeParse("%Y-%m-%d");
+export const seqArray = (start: number, end: number): number[] => {
+  const out: number[] = []
+  for (let n = start; n <= end; n++) {
+      out.push(n)
+  }
+  return out
+}
 
-export const convertDate = (date: Date): string => date.toISOString().slice(0,10)
+export const parseDate = timeParse("%Y-%m-%d")
+
+export const convertDate = (date: Date): string => date.toISOString().slice(0, 10)
 export const convertMonthYear = (date: Date): string => `${date.getFullYear()}-${date.getMonth() + 1}`
