@@ -41,9 +41,9 @@ const parseNews = (html: string): News[] => {
 }
 
 const validArticle = (article: HTMLElement): boolean => {
-    return !(isNull(article) || 
-        isNull(article.querySelector("h3")) || 
-        isNull(article.querySelector("div")) || 
+    return !(isNull(article) ||
+        isNull(article.querySelector("h3")) ||
+        isNull(article.querySelector("div")) ||
         isNull(article.querySelector("time")) ||
         isNull(article.querySelector("time").attributes.datetime)
         )
