@@ -26,14 +26,13 @@ const App: React.FC = () => {
   const [playable, setPlayable] = useState<boolean>(true)
   const [messageResult, setMessageResult] = useState<string>("")
 
-
   const loadAll = () => {
     const s = choose(sp500)
 
     Api.getMetrics(s).then(m => {
       if (m === undefined) { throw Error(`unable to get metrics for ${symbol}`) }
       if (m.length < CONFIG.quartersHistory + CONFIG.quartersPredict) {
-        throw Error(`not enough history for ${symbol}`)
+        return loadAll()
       }
 
       const startIdx = randomInt(0, m.length - CONFIG.quartersHistory - CONFIG.quartersPredict)
@@ -303,9 +302,10 @@ const App: React.FC = () => {
           <h1>Matt Levine's Insider Trading Game</h1>
           <Card body>Suppose you had access to a companies earnings report prior to anyone else.
           Surely you could predict the performance of the stock, or could you? Inspired by Matt
-          Levine's 
-           <a href="https://www.bloomberg.com/opinion/articles/2019-11-26/knowing-the-future-isn-t-that-helpful">
-          Knowing the Future Isn't That Helpful</a>.
+          Levine's <a
+            href="https://www.bloomberg.com/opinion/articles/2019-11-26/knowing-the-future-isn-t-that-helpful">
+          Knowing the Future Isn't That Helpful</a>. Check me out on <a href="https://www.github.com/breeko/stox">
+              github</a>
           </Card>
           <h1>{profile.companyName} ({symbol})</h1>
           <Card body>{profile.description}</Card>

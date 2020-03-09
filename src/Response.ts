@@ -166,3 +166,12 @@ export interface StockMetricsResponse {
     "Capex per Share": number,
   }>
 }
+
+export interface StockList {
+  symbolsList: Array<{
+    symbol: string
+    name: string
+    price: number
+    exchange: string
+  }>
+}
