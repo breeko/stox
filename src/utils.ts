@@ -51,9 +51,10 @@ export const diff = (arr: number[]): number[] => {
 }
 
 export const createOpposite = (original: StockHistory[]): StockHistory[] => {
-  const fake = _.cloneDeep(original)
-  const deltas = diff(original.map(p => p.close))
-  let cur = original ? original[0].close : 0
+  const fake = _.cloneDeep(original).sort(
+    (a, b) => a.date == null ? 1 : b.date == null ? -1 : a.date.getTime() - b.date.getTime())
+  const deltas = diff(fake.map(p => p.close))
+  let cur = fake ? fake[0].close : 0
   deltas.forEach( (d, idx) => {
     cur += d
     fake[idx + 1].close = cur

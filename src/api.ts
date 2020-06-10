@@ -1,16 +1,30 @@
 import rp from "request-promise"
-import { StockHistoricalResponse, StockHistory, StockList, StockMetric, StockMetricsResponse, StockProfile,
-  StockProfileResponse } from "./Response"
+import { StockHistoricalResponse,
+  StockHistory,
+  StockList,
+  StockMetric,
+  StockMetricsResponse,
+  StockProfile,
+  StockProfileResponse,
+} from "./Response"
+import { Secret } from "./secret-actual"
 // import { Secret } from "./secret"
 import { convertDate, convertNumeric, parseDate } from "./utils"
 
+
 const Urls = {
-    history: (stock: string, from: Date, to: Date) => `https://financialmodelingprep.com/api/v3/historical-price-full/${stock}?from=${convertDate(from)}&to=${convertDate(to)}`,
-    list: () => `https://financialmodelingprep.com/api/v3/company/stock/list`,
-    metrics: (stock: string) => `https://financialmodelingprep.com/api/v3/company-key-metrics/${stock}?period=quarter`,
-    // news: (stock: string, before: Date) => `https://newsapi.org/v2/everything?q=${stock}&from=${before}&apiKey=${Secret.NEWS_API_KEY}`,
-    newsRaw: (stock: string, before: Date) => `https://news.google.com/search?q=${stock}+before:${convertDate(before)}&hl=en-US&gl=US&ceid=US:en`,
-    profile: (stock: string) => `https://financialmodelingprep.com/api/v3/company/profile/${stock}`,
+    history: (stock: string, from: Date, to: Date) =>
+      `https://financialmodelingprep.com/api/v3/historical-price-full/${stock}?from=${convertDate(from)}&to=${convertDate(to)}&apikey=${Secret.API_KEY}`,
+    list: () =>
+    `https://financialmodelingprep.com/api/v3/company/stock/list?apikey=${Secret.API_KEY}`,
+    metrics: (stock: string) =>
+      `https://financialmodelingprep.com/api/v3/company-key-metrics/${stock}?period=quarter&apikey=${Secret.API_KEY}`,
+    // news: (stock: string, before: Date) =>
+    // `https://newsapi.org/v2/everything?q=${stock}&from=${before}&apiKey=${Secret.NEWS_API_KEY}`,
+    newsRaw: (stock: string, before: Date) =>
+    `https://news.google.com/search?q=${stock}+before:${convertDate(before)}&hl=en-US&gl=US&ceid=US:en`,
+    profile: (stock: string) =>
+    `https://financialmodelingprep.com/api/v3/company/profile/${stock}?apikey=${Secret.API_KEY}`,
 }
 
 export const Api = {
